@@ -1,0 +1,37 @@
+Buglog for mp3.1
+
+1. When we were testing paging, there is always errors called
+    "no member named xxx". Because for paging we defined two
+    structs in paging.h, the member defined inside the structs
+    were not available. So when we are calling these elements 
+    in paging.c, there are those errors shown. 
+
+    solution: it took several hours to debug this. TA James 
+    pointed out that we defined the elements in struct as uint32_t,
+    but because uint isn't originally available, we have to include a 
+    types.h in paging.h. And after we did this the error disappeared.
+
+2. When we were testing idt, at first we could not print what we pressed 
+    on keyboard. We solved this by checking the info pic. And we found that
+    the imr shown is 00, which meant that our mask is wrong. We fixed the
+    masking issue in i8259.c, and now we could print one character. 
+    
+3.  To print out more characters, we added an assembly linkage and do_irq. 
+    But still we could only print one character and no more. To debug this,
+    we added printf to show_pressed_key in keyboard.c and do_irq in idt.c,
+    and found that in do_irq, before show_pressed_key and after that are
+    all printed. Which means there are other bugs. 
+
+    When solving the bug, we looked at the eoi and suddenly found that we
+    forgot to add send_eoi in keyboard, and thus causing the function
+    to print only one character. After we added a send_eoi in both conditions
+    in show_pressed_key function in keyboard.c, we fixed the bug and 
+    successfully outputed many characters.
+
+4. After fixing all the errors and had a TA to go through the logic 
+    together, the info mem still showed pg disabled, which meant
+    the function is not operable. After checking every function, we 
+    found that we forgot to call the paging_init in kernel.c and the 
+    whole function wasn't initialized during the run. After adding paging_init,
+    the info mem showed two lines of information and the bug was fixed.
+
